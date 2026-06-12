@@ -37,6 +37,7 @@ export default function EnterpriseLayout({
   const { data: session, status } = useSession();
   const pendingOnboarding = useAuthStore((s) => s.pendingOnboarding);
   const setPendingOnboarding = useAuthStore((s) => s.setPendingOnboarding);
+  const isLoginRoute = pathname.startsWith("/enterprise/login");
   const isOnboarding = pathname.startsWith("/enterprise/onboarding");
   const inReviewerArea = pathname.startsWith("/enterprise/reviewer");
   const sessionRole = (session?.user as { role?: string } | undefined)?.role;
@@ -48,6 +49,7 @@ export default function EnterpriseLayout({
   // the reviewer IA so a hard refresh doesn't fire /api/enterprise/subscription
   // before the JWT role is hydrated (reviewer role → 403).
   const skipSubscription =
+    isLoginRoute ||
     isReviewer ||
     (inReviewerArea &&
       sessionRole !== "enterprise" &&
@@ -81,6 +83,12 @@ export default function EnterpriseLayout({
       .join("")
       .slice(0, 2)
       .toUpperCase();
+
+  // The portal-scoped sign-in page renders bare — no shell, no role guard
+  // (reachable while signed out). Placed AFTER all hooks to respect hook order.
+  if (isLoginRoute) {
+    return <>{children}</>;
+  }
 
   // Onboarding renders as its own full-page experience — no sidebar/topbar.
   // The page owns its own chrome.
