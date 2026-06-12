@@ -111,11 +111,13 @@ export function AuthSubmitButton({
   children,
   disabled,
   loading,
+  loadingLabel = "Working…",
   type = "submit",
 }: {
   children: React.ReactNode;
   disabled?: boolean;
   loading?: boolean;
+  loadingLabel?: string;
   type?: "button" | "submit";
 }) {
   const active = !disabled && !loading;
@@ -135,7 +137,7 @@ export function AuthSubmitButton({
             className="inline-block h-4 w-4 rounded-full border-2 border-on-brand/40 border-t-on-brand animate-spin"
             aria-hidden
           />
-          Working…
+          {loadingLabel}
         </span>
       ) : (
         children

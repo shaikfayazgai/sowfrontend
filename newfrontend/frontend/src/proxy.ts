@@ -61,7 +61,19 @@ const PUBLIC_PREFIXES = [
  * The landing route `/` is treated as public — it's the unauthenticated
  * entry point that routes signed-in users to their portal home.
  */
-const PUBLIC_EXACT_PATHS = new Set<string>(["/", "/admin/login"]);
+const PUBLIC_EXACT_PATHS = new Set<string>([
+  "/",
+  // Per-role portal sign-in + password flows — reachable while signed out
+  // (they live under protected portal prefixes, so list them explicitly).
+  "/admin/login",
+  "/mentor/login",
+  "/enterprise/login",
+  "/enterprise/forgot-password",
+  "/enterprise/reset-password",
+  "/reviewer/login",
+  "/reviewer/forgot-password",
+  "/reviewer/change-password",
+]);
 
 /**
  * Portal mapping: which paths require which legacy roles.

@@ -1,40 +1,51 @@
-# sowfrontend — GlimmoraTeam workforce platform
+# sowfrontend — GlimmoraTeam platform
 
-Per-role login systems + super-admin console + backend for the GlimmoraTeam
+One unified frontend (all role logins) + the role backends for the GlimmoraTeam
 (AI-governed global workforce) platform.
 
 ## Structure
 
 | Folder | What it is |
 |--------|------------|
-| `newfrontend/` | **Super-admin** frontend (Next.js) — tenants, mentors, governance, etc. + the super-admin backend scaffold. |
-| `newfrontend2/` | Per-role **login portals** (Next.js) — `mentor/`, `enterprise/`, `reviewer/`, `contributor/`, each with its own role backend. |
-| `backends/` | **Super-admin backend** (FastAPI) + the per-role backends (`enterprise`, `mentor`, `reviewer`, `freelancer`, `super-admin`) on the shared Neon Postgres DB. |
+| `newfrontend/` | **The unified frontend** (Next.js) — a single app serving every role's sign-in and portal: super-admin (`/admin/login`), mentor (`/mentor/login`), enterprise (`/enterprise/login`), reviewer (`/reviewer/login`), contributor (`/auth/login`). Routing + role-scoped access is enforced by `proxy.ts` + `normalizeRole` in `auth.ts`. |
+| `backends/` | The FastAPI backends on the shared Neon Postgres DB — `super-admin` (auth, tenants, mentors, users, audit, governance) plus the per-role backends (`enterprise`, `mentor`, `reviewer`, `freelancer`). |
+
+## Logins (one app, all roles)
+
+| Role | Sign-in route | Lands on |
+|------|---------------|----------|
+| Super-admin | `/admin/login` | `/admin/dashboard` |
+| Mentor | `/mentor/login` | `/mentor/dashboard` |
+| Enterprise | `/enterprise/login` | `/enterprise/dashboard` |
+| Reviewer | `/reviewer/login` | `/enterprise/reviewer/queue` |
+| Contributor | `/auth/login` | `/contributor/dashboard` |
+
+All authenticate via NextAuth `credentials` → the backend `POST /api/v1/auth/login`
+(shared `login_accounts`). `normalizeRole()` collapses tier roles
+(`mentor.senior`/`mentor.lead` → `mentor`, `ent.*` → `enterprise`, etc.) so each
+portal's guard accepts its role family.
 
 ## Configuration
 
 Real secrets are **not** committed. Each app ships an `.env.example`
-(and `.env.local.example` for the Next.js frontends) listing the required keys.
-Copy it and fill in your values:
+(`.env.local.example` for the frontend). Copy and fill in your values:
 
 ```bash
-# backend (FastAPI)
 cp backends/super-admin/backend/.env.example backends/super-admin/backend/.env
-
-# frontend (Next.js)
-cp newfrontend/frontend/.env.local.example newfrontend/frontend/.env.local
+cp newfrontend/frontend/.env.local.example   newfrontend/frontend/.env.local
 ```
 
-Required config includes: `DATABASE_URL` (Neon Postgres), `REDIS_URL`,
-`API_SECRET_KEY` (must match the frontend `AUTH_SECRET`), SMTP/email creds for
-onboarding emails, Google OAuth, and the Vercel Blob token.
+Required: `DATABASE_URL` (Neon), `REDIS_URL`, `API_SECRET_KEY` (== frontend
+`AUTH_SECRET`), SMTP/email creds (onboarding), Google OAuth, Vercel Blob token.
 
 ## Run (local)
 
 ```bash
-# super-admin backend (port 8102)
+# backend (port 8102)
 cd backends/super-admin/backend && python -m uvicorn app:app --host 127.0.0.1 --port 8102
 
-# super-admin frontend (port 3300)
+# unified frontend (port 3300)
 cd newfrontend/frontend && npm install && npm run dev -- -p 3300
 ```
+
+Open http://localhost:3300/admin/login (or /mentor/login, /enterprise/login, /reviewer/login).

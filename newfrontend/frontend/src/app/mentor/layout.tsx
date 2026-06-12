@@ -69,6 +69,9 @@ function MentorPortalShell({ children }: { children: React.ReactNode }) {
 
 function MentorShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  // The portal-scoped sign-in page renders bare — no shell, no role guard, no
+  // mentor profile fetch (it's reachable while signed out).
+  if (pathname.startsWith("/mentor/login")) return <>{children}</>;
   const isOnboarding = pathname.startsWith("/mentor/onboarding");
   // Keep onboarding lightweight — avoid mentor profile fetch/nav construction there.
   if (isOnboarding) return <MentorOnboardingShell>{children}</MentorOnboardingShell>;
