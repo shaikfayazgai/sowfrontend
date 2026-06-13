@@ -1,0 +1,28 @@
+# Secrets — never commit real env files (only *.env.example)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+!.env.example
+
+# Node / Next
+node_modules/
+.next/
+dist/
+build/
+.turbo/
+.vercel/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Misc
+*.log
+.DS_Store
