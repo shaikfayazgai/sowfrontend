@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "AI-Governed Outcome Delivery Platform",
 };
 
+// Auth-gated app — render every route dynamically (no static prerender).
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
